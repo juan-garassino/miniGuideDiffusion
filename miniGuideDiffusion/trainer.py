@@ -54,11 +54,19 @@ def train_mnist():
         [transforms.ToTensor()]
     )  # mnist is already normalised 0 to 1
 
+    if os.environ.get("COLAB") == 1:
+        out_dir = os.path.join(
+            os.environ.get("HOME"),
+            "..",
+            "content",
+            "miniGuideDiffusion",
+            "data",
+        )
+
     out_dir = os.path.join(
         os.environ.get("HOME"),
-        "..",
-        "content",
-        "miniGuideDiffusion",
+        "Code",
+        "juan-garassino",
         "miniGuideDiffusion",
         "data",
     )
@@ -71,6 +79,8 @@ def train_mnist():
 
     else:
         print("No data has been loaded")
+
+    print(type(dataset))
 
     dataloader = DataLoader(
         dataset,
@@ -137,10 +147,19 @@ def train_mnist():
                 x_all = torch.cat([x_gen, x_real])
                 grid = make_grid(x_all * -1 + 1, nrow=10)
 
+                if os.environ.get("COLAB") == 1:
+                    out_dir = os.path.join(
+                        os.environ.get("HOME"),
+                        "..",
+                        "content",
+                        "miniGuideDiffusion",
+                        "results",
+                    )
+
                 out_dir = os.path.join(
                     os.environ.get("HOME"),
-                    "..",
-                    "content",
+                    "Code",
+                    "juan-garassino",
                     "miniGuideDiffusion",
                     "results",
                 )
@@ -240,10 +259,19 @@ def train_mnist():
             int(os.environ.get("SAVE_MODEL")) == 1
         ):  # and ep == int(os.environ.get("N_EPOCHS") - 1):
 
+            if os.environ.get("COLAB") == 1:
+                out_dir = os.path.join(
+                    os.environ.get("HOME"),
+                    "..",
+                    "content",
+                    "miniGuideDiffusion",
+                    "checkpoints",
+                )
+
             out_dir = os.path.join(
                 os.environ.get("HOME"),
-                "..",
-                "content",
+                "Code",
+                "juan-garassino",
                 "miniGuideDiffusion",
                 "checkpoints",
             )
