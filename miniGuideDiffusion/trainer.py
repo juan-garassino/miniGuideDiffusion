@@ -106,6 +106,7 @@ def train_mnist():
                 loss_ema = loss.item()
             else:
                 loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
+            print("\n")
             pbar.set_description("⏹ " + Fore.CYAN + f"loss: {loss_ema:.4f}" +
                                  Style.RESET_ALL)
             optim.step()
@@ -134,17 +135,25 @@ def train_mnist():
 
                 x_all = torch.cat([x_gen, x_real])
                 grid = make_grid(x_all * -1 + 1, nrow=10)
-                Manager.make_directory(os.environ.get("SAVE_DIR"))
-                save_image(grid, os.environ.get("SAVE_DIR") + f"image_ep{ep}_w{w}.png")
 
-                print(
-                    "\n⏹ "
-                    + Fore.BLUE
-                    + "saved image at "
-                    + os.environ.get("SAVE_DIR")
-                    + f"image_ep{ep}_w{w}.png"
-                    + Style.RESET_ALL
+                out_dir = os.path.join(
+                    os.environ.get("HOME"),
+                    "..",
+                    "content",
+                    "miniGuideDiffusion",
+                    "results"
                 )
+
+                Manager.make_directory(out_dir) # os.environ.get("SAVE_DIR"))
+
+                save_image(
+                    grid,
+                    out_dir + # os.environ.get("SAVE_DIR") +
+                    f"image_ep{ep}_w{w}.png")
+
+                print("\n⏹ " + Fore.BLUE + "saved image at " +
+                      out_dir + # os.environ.get("SAVE_DIR") +
+                      f"image_ep{ep}_w{w}.png" + Style.RESET_ALL)
 
                 if ep % 5 == 0 or ep == int(os.environ.get("N_EPOCHS") - 1):
                     # create gif of images evolving over time, based on x_gen_store
@@ -199,34 +208,27 @@ def train_mnist():
                     )
 
                     ani.save(
-                        os.environ.get("SAVE_DIR") + f"gif_ep{ep}_w{w}.gif",
+                        out_dir + # os.environ.get("SAVE_DIR") +
+                        f"gif_ep{ep}_w{w}.gif",
                         dpi=100,
                         writer=PillowWriter(fps=5),
                     )
 
-                    print(
-                        "\n⏹ "
-                        + Fore.RED
-                        + "saved image at "
-                        + os.environ.get("SAVE_DIR")
-                        + f"gif_ep{ep}_w{w}.gif"
-                        + Style.RESET_ALL
-                    )
+                    print("\n⏹ " + Fore.RED + "saved image at " + out_dir +
+                          # os.environ.get("SAVE_DIR")
+                          f"gif_ep{ep}_w{w}.gif" +
+                          Style.RESET_ALL)
 
         # optionally save model
         if int(os.environ.get("SAVE_MODEL")) == 1: # and ep == int(os.environ.get("N_EPOCHS") - 1):
-            torch.save(
-                ddpm.state_dict(), os.environ.get("SAVE_DIR") + f"model_{ep}.pth"
-            )
+            torch.save(ddpm.state_dict(),
+                       out_dir + # os.environ.get("SAVE_DIR")
+                       f"model_{ep}.pth")
 
-            print(
-                "\n⏹ "
-                + Fore.YELLOW
-                + "saved model at "
-                + os.environ.get("SAVE_DIR")
-                + f"model_{ep}.pth"
-                + Style.RESET_ALL
-            )
+            print("\n⏹ " + Fore.YELLOW + "saved model at " +
+                  out_dir + # os.environ.get("SAVE_DIR") +
+                  f"model_{ep}.pth" +
+                  Style.RESET_ALL)
 
 
 if __name__ == "__main__":
