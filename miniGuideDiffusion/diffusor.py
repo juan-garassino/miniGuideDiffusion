@@ -4,9 +4,7 @@ import torch
 import numpy as np
 
 
-
 class DDPM(nn.Module):
-
     def __init__(self, nn_model, betas, n_T, device, drop_prob=0.1):
         super(DDPM, self).__init__()
         self.nn_model = nn_model.to(device)
@@ -26,23 +24,24 @@ class DDPM(nn.Module):
         this method is used in training, so samples t and noise randomly
         """
 
-        _ts = torch.randint(1, self.n_T, (x.shape[0], )).to(
-            self.device)  # t ~ Uniform(0, n_T)
+        _ts = torch.randint(1, self.n_T, (x.shape[0],)).to(
+            self.device
+        )  # t ~ Uniform(0, n_T)
         noise = torch.randn_like(x)  # eps ~ N(0, 1)
 
         x_t = (
-            self.sqrtab[_ts, None, None, None] * x +
-            self.sqrtmab[_ts, None, None, None] * noise
+            self.sqrtab[_ts, None, None, None] * x
+            + self.sqrtmab[_ts, None, None, None] * noise
         )  # This is the x_t, which is sqrt(alphabar) x_0 + sqrt(1-alphabar) * eps
         # We should predict the "error term" from this x_t. Loss is what we return.
 
         # dropout context with some probability
-        context_mask = torch.bernoulli(torch.zeros_like(c) +
-                                       self.drop_prob).to(self.device)
+        context_mask = torch.bernoulli(torch.zeros_like(c) + self.drop_prob).to(
+            self.device
+        )
 
         # return MSE between added noise, and our predicted noise
-        return self.loss_mse(
-            noise, self.nn_model(x_t, c, _ts / self.n_T, context_mask))
+        return self.loss_mse(noise, self.nn_model(x_t, c, _ts / self.n_T, context_mask))
 
     def sample(self, n_sample, size, device, guide_w=0.0):
         # we follow the guidance sampling scheme described in 'Classifier-Free Diffusion Guidance'
@@ -52,9 +51,11 @@ class DDPM(nn.Module):
         # where w>0 means more guidance
 
         x_i = torch.randn(n_sample, *size).to(
-            device)  # x_T ~ N(0, 1), sample initial noise
+            device
+        )  # x_T ~ N(0, 1), sample initial noise
         c_i = torch.arange(0, 10).to(
-            device)  # context for us just cycles throught the mnist labels
+            device
+        )  # context for us just cycles throught the mnist labels
         c_i = c_i.repeat(int(n_sample / c_i.shape[0]))
 
         # don't drop context at test time
@@ -63,13 +64,12 @@ class DDPM(nn.Module):
         # double the batch
         c_i = c_i.repeat(2)
         context_mask = context_mask.repeat(2)
-        context_mask[n_sample:] = 1.  # makes second half of batch context free
+        context_mask[n_sample:] = 1.0  # makes second half of batch context free
 
-        x_i_store = [
-        ]  # keep track of generated steps in case want to plot something
+        x_i_store = []  # keep track of generated steps in case want to plot something
         print()
         for i in range(self.n_T, 0, -1):
-            print(f'sampling timestep {i}', end='\r')
+            print(f"sampling timestep {i}", end="\r")
             t_is = torch.tensor([i / self.n_T]).to(device)
             t_is = t_is.repeat(n_sample, 1, 1, 1)
 
@@ -85,9 +85,10 @@ class DDPM(nn.Module):
             eps2 = eps[n_sample:]
             eps = (1 + guide_w) * eps1 - guide_w * eps2
             x_i = x_i[:n_sample]
-            x_i = (self.oneover_sqrta[i] *
-                   (x_i - eps * self.mab_over_sqrtmab[i]) +
-                   self.sqrt_beta_t[i] * z)
+            x_i = (
+                self.oneover_sqrta[i] * (x_i - eps * self.mab_over_sqrtmab[i])
+                + self.sqrt_beta_t[i] * z
+            )
             if i % 20 == 0 or i == self.n_T or i < 8:
                 x_i_store.append(x_i.detach().cpu().numpy())
 

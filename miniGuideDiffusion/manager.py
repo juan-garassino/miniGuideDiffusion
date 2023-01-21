@@ -2,6 +2,7 @@ import errno
 from colorama import Fore, Style
 import os
 
+
 class Manager:  # make manager work with and with out epochs
     def __init__():
         pass

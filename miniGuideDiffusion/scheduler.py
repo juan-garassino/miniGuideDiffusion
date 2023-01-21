@@ -1,13 +1,13 @@
 import torch
 
+
 def ddpm_schedules(beta1, beta2, T):
     """
     Returns pre-computed schedules for DDPM sampling, training process.
     """
     assert beta1 < beta2 < 1.0, "beta1 and beta2 must be in (0, 1)"
 
-    beta_t = (beta2 - beta1) * torch.arange(0, T + 1,
-                                            dtype=torch.float32) / T + beta1
+    beta_t = (beta2 - beta1) * torch.arange(0, T + 1, dtype=torch.float32) / T + beta1
     sqrt_beta_t = torch.sqrt(beta_t)
     alpha_t = 1 - beta_t
     log_alpha_t = torch.log(alpha_t)
@@ -26,6 +26,5 @@ def ddpm_schedules(beta1, beta2, T):
         "alphabar_t": alphabar_t,  # \bar{\alpha_t}
         "sqrtab": sqrtab,  # \sqrt{\bar{\alpha_t}}
         "sqrtmab": sqrtmab,  # \sqrt{1-\bar{\alpha_t}}
-        "mab_over_sqrtmab":
-        mab_over_sqrtmab_inv,  # (1-\alpha_t)/\sqrt{1-\bar{\alpha_t}}
+        "mab_over_sqrtmab": mab_over_sqrtmab_inv,  # (1-\alpha_t)/\sqrt{1-\bar{\alpha_t}}
     }

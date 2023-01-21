@@ -4,8 +4,8 @@ from miniGuideDiffusion.embedding import EmbedFC
 import torch
 import torch.nn as nn
 
-class ContextUnet(nn.Module):
 
+class ContextUnet(nn.Module):
     def __init__(self, in_channels, n_feat=256, n_classes=10):
         super(ContextUnet, self).__init__()
 
@@ -27,8 +27,9 @@ class ContextUnet(nn.Module):
 
         self.up0 = nn.Sequential(
             # nn.ConvTranspose2d(6 * n_feat, 2 * n_feat, 7, 7), # when concat temb and cemb end up w 6*n_feat
-            nn.ConvTranspose2d(2 * n_feat, 2 * n_feat, 7,
-                               7),  # otherwise just have 2*n_feat
+            nn.ConvTranspose2d(
+                2 * n_feat, 2 * n_feat, 7, 7
+            ),  # otherwise just have 2*n_feat
             nn.GroupNorm(8, 2 * n_feat),
             nn.ReLU(),
         )
@@ -52,13 +53,12 @@ class ContextUnet(nn.Module):
         hiddenvec = self.to_vec(down2)
 
         # convert context to one hot embedding
-        c = nn.functional.one_hot(c,
-                                  num_classes=self.n_classes).type(torch.float)
+        c = nn.functional.one_hot(c, num_classes=self.n_classes).type(torch.float)
 
         # mask out context if context_mask == 1
         context_mask = context_mask[:, None]
         context_mask = context_mask.repeat(1, self.n_classes)
-        context_mask = (-1 * (1 - context_mask))  # need to flip 0 <-> 1
+        context_mask = -1 * (1 - context_mask)  # need to flip 0 <-> 1
         c = c * context_mask
 
         # embed context, time step
@@ -72,8 +72,7 @@ class ContextUnet(nn.Module):
 
         up1 = self.up0(hiddenvec)
         # up2 = self.up1(up1, down2) # if want to avoid add and multiply embeddings
-        up2 = self.up1(cemb1 * up1 + temb1,
-                       down2)  # add and multiply embeddings
+        up2 = self.up1(cemb1 * up1 + temb1, down2)  # add and multiply embeddings
         up3 = self.up2(cemb2 * up2 + temb2, down1)
         out = self.out(torch.cat((up3, x), 1))
         return out

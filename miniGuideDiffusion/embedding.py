@@ -1,12 +1,12 @@
 import torch.nn as nn
 
-class EmbedFC(nn.Module):
 
+class EmbedFC(nn.Module):
     def __init__(self, input_dim, emb_dim):
         super(EmbedFC, self).__init__()
-        '''
+        """
         generic one layer FC NN for embedding things
-        '''
+        """
         self.input_dim = input_dim
         layers = [
             nn.Linear(input_dim, emb_dim),

@@ -1,16 +1,15 @@
 import torch
 import torch.nn as nn
 
-class ResidualConvBlock(nn.Module):
 
-    def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
-                 is_res: bool = False) -> None:
+class ResidualConvBlock(nn.Module):
+    def __init__(
+        self, in_channels: int, out_channels: int, is_res: bool = False
+    ) -> None:
         super().__init__()
-        '''
+        """
         standard ResNet style convolutional block
-        '''
+        """
         self.same_channels = in_channels == out_channels
         self.is_res = is_res
         self.conv1 = nn.Sequential(
