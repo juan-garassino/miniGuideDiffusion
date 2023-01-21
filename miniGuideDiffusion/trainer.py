@@ -63,11 +63,20 @@ def train_mnist():
         [transforms.ToTensor()]
     )  # mnist is already normalised 0 to 1
 
+    out_dir = os.path.join(
+                            os.environ.get("HOME"),
+                            "..",
+                            "content",
+                            "miniGuideDiffusion",
+                            "miniGuideDiffusion",
+                            "data"
+                        )
+
     if os.environ.get("DATASET") == "digits":
-        dataset = MNIST("./data", train=True, download=True, transform=tf)
+        dataset = MNIST(out_dir, train=True, download=True, transform=tf)
 
     if os.environ.get("DATASET") == "fashion":
-        dataset = FashionMNIST("./data", train=True, download=True, transform=tf)
+        dataset = FashionMNIST(out_dir, train=True, download=True, transform=tf)
 
     else:
         print("No data has been loaded")
