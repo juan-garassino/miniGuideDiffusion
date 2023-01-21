@@ -153,13 +153,13 @@ def train_mnist():
                         ncols=int(os.environ.get("N_CLASSES")),
                         sharex=True,
                         sharey=True,
-                        figsize=(8, 3),
+                        figsize=(8, 4 * 3),
                     )
 
                     def animate_diff(i, x_gen_store):
 
                         print(
-                            "\n⏹ " + Fore.MAGENTA +
+                            "⏹ " + Fore.MAGENTA +
                             f"gif animating frame {i} of {x_gen_store.shape[0]}"
                             + Style.RESET_ALL,
                             end='\r')
