@@ -214,7 +214,7 @@ def train_mnist():
                     )
 
         # optionally save model
-        if os.environ.get("SAVE_MODEL") and ep == int(os.environ.get("N_EPOCHS") - 1):
+        if int(os.environ.get("SAVE_MODEL")) == 1: # and ep == int(os.environ.get("N_EPOCHS") - 1):
             torch.save(
                 ddpm.state_dict(), os.environ.get("SAVE_DIR") + f"model_{ep}.pth"
             )
