@@ -20,6 +20,7 @@ from tqdm import tqdm
 from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.utils import save_image, make_grid
 import torch
+import torch.utils.data as data_utils
 
 # import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -54,7 +55,7 @@ def train_mnist():
         [transforms.ToTensor()]
     )  # mnist is already normalised 0 to 1
 
-    if os.environ.get("COLAB") == 1:
+    if int(os.environ.get("COLAB")) == 1:
         out_dir = os.path.join(
             os.environ.get("HOME"),
             "..",
@@ -72,21 +73,26 @@ def train_mnist():
     )
 
     if os.environ.get("DATASET") == "digits":
-        dataset = MNIST(out_dir, train=True, download=True, transform=tf)
+        dataset = MNIST(out_dir, train=True, download=True,
+                        transform=tf)
 
     if os.environ.get("DATASET") == "fashion":
-        dataset = FashionMNIST(out_dir, train=True, download=True, transform=tf)
+        dataset = FashionMNIST(
+            out_dir, train=True, download=True,
+            transform=tf)
 
     else:
         print("No data has been loaded")
 
-    print(type(dataset))
+    indices = torch.arange(int(os.environ.get('DATASET_SIZE')))
+
+    dataset = data_utils.Subset(dataset, indices)
 
     dataloader = DataLoader(
         dataset,
         batch_size=int(os.environ.get("BATCH_SIZE")),
         shuffle=True,
-        num_workers=5,
+        num_workers=1#5,
     )
 
     optim = torch.optim.Adam(
@@ -147,7 +153,7 @@ def train_mnist():
                 x_all = torch.cat([x_gen, x_real])
                 grid = make_grid(x_all * -1 + 1, nrow=10)
 
-                if os.environ.get("COLAB") == 1:
+                if int(os.environ.get("COLAB")) == 1:
                     out_dir = os.path.join(
                         os.environ.get("HOME"),
                         "..",
@@ -156,13 +162,14 @@ def train_mnist():
                         "results",
                     )
 
-                out_dir = os.path.join(
-                    os.environ.get("HOME"),
-                    "Code",
-                    "juan-garassino",
-                    "miniGuideDiffusion",
-                    "results",
-                )
+                else:
+                    out_dir = os.path.join(
+                        os.environ.get("HOME"),
+                        "Code",
+                        "juan-garassino",
+                        "miniGuideDiffusion",
+                        "results",
+                    )
 
                 Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
@@ -259,7 +266,7 @@ def train_mnist():
             int(os.environ.get("SAVE_MODEL")) == 1
         ):  # and ep == int(os.environ.get("N_EPOCHS") - 1):
 
-            if os.environ.get("COLAB") == 1:
+            if int(os.environ.get("COLAB")) == 1:
                 out_dir = os.path.join(
                     os.environ.get("HOME"),
                     "..",
@@ -268,13 +275,14 @@ def train_mnist():
                     "checkpoints",
                 )
 
-            out_dir = os.path.join(
-                os.environ.get("HOME"),
-                "Code",
-                "juan-garassino",
-                "miniGuideDiffusion",
-                "checkpoints",
-            )
+            else:
+                out_dir = os.path.join(
+                    os.environ.get("HOME"),
+                    "Code",
+                    "juan-garassino",
+                    "miniGuideDiffusion",
+                    "checkpoints",
+                )
 
             Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
