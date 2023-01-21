@@ -106,9 +106,8 @@ def train_mnist():
                 loss_ema = loss.item()
             else:
                 loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
-            pbar.set_description("\n⏹ " + Fore.CYAN + f"loss: {loss_ema:.4f}" +
-                                 Style.RESET_ALL,
-                                 end='\r')
+            pbar.set_description("⏹ " + Fore.CYAN + f"loss: {loss_ema:.4f}" +
+                                 Style.RESET_ALL)
             optim.step()
 
         # for eval, save an image of currently generated samples (top rows)
