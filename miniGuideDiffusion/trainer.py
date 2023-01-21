@@ -158,7 +158,7 @@ def train_mnist():
                 save_image(
                     grid,
                     out_dir + # os.environ.get("SAVE_DIR") +
-                    f"image_ep{ep}_w{w}.png")
+                    f"/image_ep{ep}_w{w}.png")
 
                 print("\n⏹ " + Fore.BLUE + "saved image at " +
                       out_dir + # os.environ.get("SAVE_DIR") +
@@ -218,7 +218,7 @@ def train_mnist():
 
                     ani.save(
                         out_dir + # os.environ.get("SAVE_DIR") +
-                        f"gif_ep{ep}_w{w}.gif",
+                        f"/gif_ep{ep}_w{w}.gif",
                         dpi=100,
                         writer=PillowWriter(fps=5),
                     )
