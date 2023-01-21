@@ -94,7 +94,7 @@ def train_mnist():
             for w_i, w in enumerate(os.environ.get('WS_TEST').split(",")):
                 x_gen, x_gen_store = ddpm.sample(n_sample, (1, 28, 28),
                                                  os.environ.get('DEVICE'),
-                                                 guide_w=w)
+                                                 guide_w=float(w))
 
                 # append some real images at bottom, order by class also
                 x_real = torch.Tensor(x_gen.shape).to(os.environ.get('DEVICE'))
