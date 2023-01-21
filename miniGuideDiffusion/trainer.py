@@ -11,6 +11,7 @@ https://arxiv.org/abs/2205.11487
 '''
 from miniGuideDiffusion.context import ContextUnet
 from miniGuideDiffusion.diffusor import DDPM
+from miniGuideDiffusion.manager import Manager
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 #from typing import Dict, Tuple
@@ -110,6 +111,7 @@ def train_mnist():
 
                 x_all = torch.cat([x_gen, x_real])
                 grid = make_grid(x_all * -1 + 1, nrow=10)
+                Manager.make_directory(os.environ.get('SAVE_DIR'))
                 save_image(grid, os.environ.get('SAVE_DIR') + f"image_ep{ep}_w{w}.png")
                 print('saved image at ' + os.environ.get('SAVE_DIR') +
                       f"image_ep{ep}_w{w}.png")
