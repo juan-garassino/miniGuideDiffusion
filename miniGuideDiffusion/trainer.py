@@ -30,19 +30,6 @@ from colorama import Fore, Style
 
 def train_mnist():
 
-    # hardcoding these here
-    """n_epoch = 20
-    batch_size = 256
-    n_T = 400  # 500
-    device = "cpu" #"cuda:0" torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    n_classes = 10
-    n_feat = 128  # 128 ok, 256 better (but slower)
-    lrate = 1e-4
-    save_model = False
-    save_dir = './data/diffusion_outputs10/'
-    ws_test = [0.0, 0.5, 2.0]  # strength of generative guidance
-    n_samples = 10"""
-
     ddpm = DDPM(
         nn_model=ContextUnet(
             in_channels=1,
@@ -57,7 +44,9 @@ def train_mnist():
     ddpm.to(os.environ.get("DEVICE"))
 
     # optionally load a model
-    # ddpm.load_state_dict(torch.load("./data/diffusion_outputs/ddpm_unet01_mnist_9.pth"))
+
+    if os.environ.get('LOAD_MODEL') == 1:
+        ddpm.load_state_dict(torch.load("./data/diffusion_outputs/ddpm_unet01_mnist_9.pth"))
 
     tf = transforms.Compose(
         [transforms.ToTensor()]
@@ -162,7 +151,7 @@ def train_mnist():
 
                 print("\n⏹ " + Fore.BLUE + "saved image at " +
                       out_dir + # os.environ.get("SAVE_DIR") +
-                      f"image_ep{ep}_w{w}.png" + Style.RESET_ALL)
+                      f"/image_ep{ep}_w{w}.png" + Style.RESET_ALL)
 
                 if ep % 5 == 0 or ep == int(os.environ.get("N_EPOCHS") - 1):
                     # create gif of images evolving over time, based on x_gen_store
@@ -225,18 +214,29 @@ def train_mnist():
 
                     print("\n⏹ " + Fore.RED + "saved image at " + out_dir +
                           # os.environ.get("SAVE_DIR")
-                          f"gif_ep{ep}_w{w}.gif" +
+                          f"/gif_ep{ep}_w{w}.gif" +
                           Style.RESET_ALL)
 
         # optionally save model
         if int(os.environ.get("SAVE_MODEL")) == 1: # and ep == int(os.environ.get("N_EPOCHS") - 1):
+
+            out_dir = os.path.join(
+                    os.environ.get("HOME"),
+                    "..",
+                    "content",
+                    "miniGuideDiffusion",
+                    "checkpoints"
+                )
+
+            Manager.make_directory(out_dir) # os.environ.get("SAVE_DIR"))
+
             torch.save(ddpm.state_dict(),
                        out_dir + # os.environ.get("SAVE_DIR")
                        f"model_{ep}.pth")
 
             print("\n⏹ " + Fore.YELLOW + "saved model at " +
                   out_dir + # os.environ.get("SAVE_DIR") +
-                  f"model_{ep}.pth" +
+                  f"/model_{ep}.pth" +
                   Style.RESET_ALL)
 
 
