@@ -232,7 +232,7 @@ def train_mnist():
 
             torch.save(ddpm.state_dict(),
                        out_dir + # os.environ.get("SAVE_DIR")
-                       f"model_{ep}.pth")
+                       f"/model_{ep}.pth")
 
             print("\n⏹ " + Fore.YELLOW + "saved model at " +
                   out_dir + # os.environ.get("SAVE_DIR") +
