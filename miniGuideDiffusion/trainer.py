@@ -106,9 +106,9 @@ def train_mnist():
                 loss_ema = loss.item()
             else:
                 loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
-            pbar.set_description(
-                "\n⏹ " + Fore.BLUE + f"loss: {loss_ema:.4f}" + Style.RESET_ALL
-            )
+            pbar.set_description("\n⏹ " + Fore.CYAN + f"loss: {loss_ema:.4f}" +
+                                 Style.RESET_ALL,
+                                 end='\r')
             optim.step()
 
         # for eval, save an image of currently generated samples (top rows)
@@ -160,11 +160,10 @@ def train_mnist():
                     def animate_diff(i, x_gen_store):
 
                         print(
-                            "\n⏹ "
-                            + Fore.PURPLE
-                            + f"gif animating frame {i} of {x_gen_store.shape[0]}"
-                            + Style.RESET_ALL
-                        )
+                            "\n⏹ " + Fore.MAGENTA +
+                            f"gif animating frame {i} of {x_gen_store.shape[0]}"
+                            + Style.RESET_ALL,
+                            end='\r')
 
                         plots = []
                         for row in range(
