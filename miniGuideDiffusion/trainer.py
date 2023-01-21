@@ -45,21 +45,23 @@ def train_mnist():
 
     # optionally load a model
 
-    if os.environ.get('LOAD_MODEL') == 1:
-        ddpm.load_state_dict(torch.load("./data/diffusion_outputs/ddpm_unet01_mnist_9.pth"))
+    if os.environ.get("LOAD_MODEL") == 1:
+        ddpm.load_state_dict(
+            torch.load("./data/diffusion_outputs/ddpm_unet01_mnist_9.pth")
+        )
 
     tf = transforms.Compose(
         [transforms.ToTensor()]
     )  # mnist is already normalised 0 to 1
 
     out_dir = os.path.join(
-                            os.environ.get("HOME"),
-                            "..",
-                            "content",
-                            "miniGuideDiffusion",
-                            "miniGuideDiffusion",
-                            "data"
-                        )
+        os.environ.get("HOME"),
+        "..",
+        "content",
+        "miniGuideDiffusion",
+        "miniGuideDiffusion",
+        "data",
+    )
 
     if os.environ.get("DATASET") == "digits":
         dataset = MNIST(out_dir, train=True, download=True, transform=tf)
@@ -105,8 +107,9 @@ def train_mnist():
                 loss_ema = loss.item()
             else:
                 loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
-            pbar.set_description("⏹ " + Fore.CYAN + f"loss: {loss_ema:.4f}" +
-                                 Style.RESET_ALL)
+            pbar.set_description(
+                "⏹ " + Fore.CYAN + f"loss: {loss_ema:.4f}" + Style.RESET_ALL
+            )
             optim.step()
 
         # for eval, save an image of currently generated samples (top rows)
@@ -139,21 +142,28 @@ def train_mnist():
                     "..",
                     "content",
                     "miniGuideDiffusion",
-                    "results"
+                    "results",
                 )
 
-                Manager.make_directory(out_dir) # os.environ.get("SAVE_DIR"))
+                Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
                 save_image(
                     grid,
-                    out_dir + # os.environ.get("SAVE_DIR") +
-                    f"/image_ep{ep}_w{w}.png")
+                    out_dir + f"/image_ep{ep}_w{w}.png",  # os.environ.get("SAVE_DIR") +
+                )
 
-                print("\n⏹ " + Fore.BLUE + "saved image @ " +
-                      out_dir + # os.environ.get("SAVE_DIR") +
-                      f"/image_ep{ep}_w{w}.png" + Style.RESET_ALL)
+                print(
+                    "\n⏹ "
+                    + Fore.BLUE
+                    + "saved image @ "
+                    + out_dir
+                    + f"/image_ep{ep}_w{w}.png"  # os.environ.get("SAVE_DIR") +
+                    + Style.RESET_ALL
+                )
 
-                if ep % int(os.environ.get('ANIMATION_STEP')) == 0 or ep == int(int(os.environ.get("N_EPOCHS")) - 1):
+                if ep % int(os.environ.get("ANIMATION_STEP")) == 0 or ep == int(
+                    int(os.environ.get("N_EPOCHS")) - 1
+                ):
                     # create gif of images evolving over time, based on x_gen_store
                     fig, axs = plt.subplots(
                         nrows=int(n_sample / int(os.environ.get("N_CLASSES"))),
@@ -166,10 +176,12 @@ def train_mnist():
                     def animate_diff(i, x_gen_store):
 
                         print(
-                            "⏹ " + Fore.MAGENTA +
-                            f"gif animating frame {i} of {x_gen_store.shape[0]}"
+                            "⏹ "
+                            + Fore.MAGENTA
+                            + f"gif animating frame {i} of {x_gen_store.shape[0]}"
                             + Style.RESET_ALL,
-                            end='\r')
+                            end="\r",
+                        )
 
                         plots = []
                         for row in range(
@@ -206,38 +218,51 @@ def train_mnist():
                     )
 
                     ani.save(
-                        out_dir + # os.environ.get("SAVE_DIR") +
-                        f"/gif_ep{ep}_w{w}.gif",
+                        out_dir
+                        + f"/gif_ep{ep}_w{w}.gif",  # os.environ.get("SAVE_DIR") +
                         dpi=100,
                         writer=PillowWriter(fps=5),
                     )
 
-                    print("\n⏹ " + Fore.RED + "saved gif @ " + out_dir +
-                          # os.environ.get("SAVE_DIR")
-                          f"/gif_ep{ep}_w{w}.gif" +
-                          Style.RESET_ALL)
+                    print(
+                        "\n⏹ "
+                        + Fore.RED
+                        + "saved gif @ "
+                        + out_dir
+                        +
+                        # os.environ.get("SAVE_DIR")
+                        f"/gif_ep{ep}_w{w}.gif"
+                        + Style.RESET_ALL
+                    )
 
         # optionally save model
-        if int(os.environ.get("SAVE_MODEL")) == 1: # and ep == int(os.environ.get("N_EPOCHS") - 1):
+        if (
+            int(os.environ.get("SAVE_MODEL")) == 1
+        ):  # and ep == int(os.environ.get("N_EPOCHS") - 1):
 
             out_dir = os.path.join(
-                    os.environ.get("HOME"),
-                    "..",
-                    "content",
-                    "miniGuideDiffusion",
-                    "checkpoints"
-                )
+                os.environ.get("HOME"),
+                "..",
+                "content",
+                "miniGuideDiffusion",
+                "checkpoints",
+            )
 
-            Manager.make_directory(out_dir) # os.environ.get("SAVE_DIR"))
+            Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
-            torch.save(ddpm.state_dict(),
-                       out_dir + # os.environ.get("SAVE_DIR")
-                       f"/model_{ep}.pth")
+            torch.save(
+                ddpm.state_dict(),
+                out_dir + f"/model_{ep}.pth",  # os.environ.get("SAVE_DIR")
+            )
 
-            print("\n⏹ " + Fore.YELLOW + "saved model at " +
-                  out_dir + # os.environ.get("SAVE_DIR") +
-                  f"/model_{ep}.pth" +
-                  Style.RESET_ALL)
+            print(
+                "\n⏹ "
+                + Fore.YELLOW
+                + "saved model at "
+                + out_dir
+                + f"/model_{ep}.pth"  # os.environ.get("SAVE_DIR") +
+                + Style.RESET_ALL
+            )
 
 
 if __name__ == "__main__":

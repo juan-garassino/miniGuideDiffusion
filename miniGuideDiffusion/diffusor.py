@@ -70,8 +70,9 @@ class DDPM(nn.Module):
         x_i_store = []  # keep track of generated steps in case want to plot something
         print()
         for i in range(self.n_T, 0, -1):
-            print("⏹ " + Fore.BLUE + f"sampling timestep {i}",
-                  end="\r" + Style.RESET_ALL)
+            print(
+                "⏹ " + Fore.BLUE + f"sampling timestep {i}", end="\r" + Style.RESET_ALL
+            )
             t_is = torch.tensor([i / self.n_T]).to(device)
             t_is = t_is.repeat(n_sample, 1, 1, 1)
 
