@@ -91,7 +91,7 @@ def train_mnist():
         ddpm.eval()
         with torch.no_grad():
             n_sample = int(os.environ.get('N_SAMPLES')) * int(os.environ.get('N_CLASSES'))
-            for w_i, w in enumerate(os.environ.get('WS_TEST')):
+            for w_i, w in enumerate(os.environ.get('WS_TEST').split(",")):
                 x_gen, x_gen_store = ddpm.sample(n_sample, (1, 28, 28),
                                                  os.environ.get('DEVICE'),
                                                  guide_w=w)
