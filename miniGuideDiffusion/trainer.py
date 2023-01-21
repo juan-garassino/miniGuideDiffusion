@@ -96,6 +96,7 @@ def train_mnist():
 
         pbar = tqdm(dataloader)
         loss_ema = None
+        print("\n")
         for x, c in pbar:
             optim.zero_grad()
             x = x.to(os.environ.get("DEVICE"))
@@ -106,7 +107,6 @@ def train_mnist():
                 loss_ema = loss.item()
             else:
                 loss_ema = 0.95 * loss_ema + 0.05 * loss.item()
-            print("\n")
             pbar.set_description("⏹ " + Fore.CYAN + f"loss: {loss_ema:.4f}" +
                                  Style.RESET_ALL)
             optim.step()
