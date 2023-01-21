@@ -16,13 +16,14 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 #from typing import Dict, Tuple
 from tqdm import tqdm
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.utils import save_image, make_grid
 import torch
 #import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms, models
 import os
+from colorama import Fore, Style
 
 
 
@@ -56,7 +57,11 @@ def train_mnist():
     tf = transforms.Compose([transforms.ToTensor()
                              ])  # mnist is already normalised 0 to 1
 
-    dataset = MNIST("./data", train=True, download=True, transform=tf)
+    if os.environ.get('DATASET') == 'digits':
+        dataset = MNIST("./data", train=True, download=True, transform=tf)
+
+    if os.environ.get('DATASET') == 'fashion':
+        dataset = FashionMNIST("./data", train=True, download=True, transform=tf)
 
     dataloader = DataLoader(dataset,
                             batch_size=int(os.environ.get('BATCH_SIZE')),
@@ -66,7 +71,9 @@ def train_mnist():
     optim = torch.optim.Adam(ddpm.parameters(), lr=float(os.environ.get('LEARNING_RATE')))
 
     for ep in range(int(os.environ.get('N_EPOCHS'))):
-        print(f'epoch {ep}')
+
+        print("\n⏹ " + Fore.BLUE + f'epoch {ep}' + Style.RESET_ALL)
+
         ddpm.train()
 
         # linear lrate decay
@@ -113,8 +120,10 @@ def train_mnist():
                 grid = make_grid(x_all * -1 + 1, nrow=10)
                 Manager.make_directory(os.environ.get('SAVE_DIR'))
                 save_image(grid, os.environ.get('SAVE_DIR') + f"image_ep{ep}_w{w}.png")
-                print('saved image at ' + os.environ.get('SAVE_DIR') +
-                      f"image_ep{ep}_w{w}.png")
+
+                print("\n⏹ " + Fore.BLUE + 'saved image at ' +
+                      os.environ.get('SAVE_DIR') + f"image_ep{ep}_w{w}.png" +
+                      Style.RESET_ALL)
 
                 if ep % 5 == 0 or ep == int(os.environ.get('N_EPOCHS') - 1):
                     # create gif of images evolving over time, based on x_gen_store
@@ -126,9 +135,12 @@ def train_mnist():
                         figsize=(8, 3))
 
                     def animate_diff(i, x_gen_store):
+
                         print(
-                            f'gif animating frame {i} of {x_gen_store.shape[0]}',
-                            end='\r')
+                            "\n⏹ " + Fore.PURPLE +
+                            f'gif animating frame {i} of {x_gen_store.shape[0]}'
+                            + Style.RESET_ALL)
+
                         plots = []
                         for row in range(
                                 int(n_sample /
@@ -161,15 +173,20 @@ def train_mnist():
                              dpi=100,
                              writer=PillowWriter(fps=5))
 
-                    print('saved image at ' + os.environ.get('SAVE_DIR') +
-                          f"gif_ep{ep}_w{w}.gif")
+                    print("\n⏹ " + Fore.RED + 'saved image at ' +
+                          os.environ.get('SAVE_DIR') + f"gif_ep{ep}_w{w}.gif" +
+                          Style.RESET_ALL)
+
+
         # optionally save model
         if os.environ.get('SAVE_MODEL') and ep == int(
                 os.environ.get('N_EPOCHS') - 1):
             torch.save(ddpm.state_dict(),
                        os.environ.get('SAVE_DIR') + f"model_{ep}.pth")
-            print('saved model at ' + os.environ.get('SAVE_DIR') +
-                  f"model_{ep}.pth")
+
+            print("\n⏹ " + Fore.YELLOW + 'saved model at ' +
+                  os.environ.get('SAVE_DIR') + f"model_{ep}.pth" +
+                  Style.RESET_ALL)
 
 
 if __name__ == "__main__":
