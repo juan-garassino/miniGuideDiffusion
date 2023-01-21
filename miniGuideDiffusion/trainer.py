@@ -83,7 +83,7 @@ def train_mnist():
 
     for ep in range(int(os.environ.get("N_EPOCHS"))):
 
-        print("\n⏹ " + Fore.BLUE + f"epoch {ep}" + Style.RESET_ALL)
+        print("\n⏹ " + Fore.MAGENTA + f"epoch {ep}" + Style.RESET_ALL)
 
         ddpm.train()
 
@@ -149,7 +149,7 @@ def train_mnist():
                     out_dir + # os.environ.get("SAVE_DIR") +
                     f"/image_ep{ep}_w{w}.png")
 
-                print("\n⏹ " + Fore.BLUE + "saved image at " +
+                print("\n⏹ " + Fore.BLUE + "saved image @ " +
                       out_dir + # os.environ.get("SAVE_DIR") +
                       f"/image_ep{ep}_w{w}.png" + Style.RESET_ALL)
 
@@ -212,7 +212,7 @@ def train_mnist():
                         writer=PillowWriter(fps=5),
                     )
 
-                    print("\n⏹ " + Fore.RED + "saved image at " + out_dir +
+                    print("\n⏹ " + Fore.RED + "saved gif @ " + out_dir +
                           # os.environ.get("SAVE_DIR")
                           f"/gif_ep{ep}_w{w}.gif" +
                           Style.RESET_ALL)
