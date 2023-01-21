@@ -153,7 +153,7 @@ def train_mnist():
                       out_dir + # os.environ.get("SAVE_DIR") +
                       f"/image_ep{ep}_w{w}.png" + Style.RESET_ALL)
 
-                if ep % 5 == 0 or ep == int(int(os.environ.get("N_EPOCHS")) - 1):
+                if ep % int(os.environ.get('ANIMATION_STEP')) == 0 or ep == int(int(os.environ.get("N_EPOCHS")) - 1):
                     # create gif of images evolving over time, based on x_gen_store
                     fig, axs = plt.subplots(
                         nrows=int(n_sample / int(os.environ.get("N_CLASSES"))),
