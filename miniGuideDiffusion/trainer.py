@@ -21,32 +21,33 @@ import torch
 #import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms, models
+import os
 
 
 
 def train_mnist():
 
     # hardcoding these here
-    n_epoch = 20
-    batch_size = 256
-    n_T = 400  # 500
-    device = "cpu" #"cuda:0" torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    n_classes = 10
-    n_feat = 128  # 128 ok, 256 better (but slower)
-    lrate = 1e-4
-    save_model = False
-    save_dir = './data/diffusion_outputs10/'
-    ws_test = [0.0, 0.5, 2.0]  # strength of generative guidance
-    n_samples = 10
+    """    n_epoch = 20
+        batch_size = 256
+        n_T = 400  # 500
+        device = "cpu" #"cuda:0" torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        n_classes = 10
+        n_feat = 128  # 128 ok, 256 better (but slower)
+        lrate = 1e-4
+        save_model = False
+        save_dir = './data/diffusion_outputs10/'
+        ws_test = [0.0, 0.5, 2.0]  # strength of generative guidance
+        n_samples = 10"""
 
     ddpm = DDPM(nn_model=ContextUnet(in_channels=1,
-                                     n_feat=n_feat,
-                                     n_classes=n_classes),
+                                     n_feat=int(os.environ.get('N_FEATURES')),
+                                     n_classes=int(os.environ.get('N_CLASSES'))),
                 betas=(1e-4, 0.02),
-                n_T=n_T,
-                device=device,
+                n_T=int(os.environ.get('N_T')),
+                device=os.environ.get('DEVICE'),
                 drop_prob=0.1)
-    ddpm.to(device)
+    ddpm.to(os.environ.get('DEVICE'))
 
     # optionally load a model
     # ddpm.load_state_dict(torch.load("./data/diffusion_outputs/ddpm_unet01_mnist_9.pth"))
@@ -57,25 +58,25 @@ def train_mnist():
     dataset = MNIST("./data", train=True, download=True, transform=tf)
 
     dataloader = DataLoader(dataset,
-                            batch_size=batch_size,
+                            batch_size=int(os.environ.get('BATCH_SIZE')),
                             shuffle=True,
                             num_workers=5)
 
-    optim = torch.optim.Adam(ddpm.parameters(), lr=lrate)
+    optim = torch.optim.Adam(ddpm.parameters(), lr=float(os.environ.get('LEARNING_RATE')))
 
-    for ep in range(n_epoch):
+    for ep in range(int(os.environ.get('N_EPOCHS'))):
         print(f'epoch {ep}')
         ddpm.train()
 
         # linear lrate decay
-        optim.param_groups[0]['lr'] = lrate * (1 - ep / n_epoch)
+        optim.param_groups[0]['lr'] = float(os.environ.get('LEARNING_RATE')) * (1 - ep / int(os.environ.get('N_EPOCHS')))
 
         pbar = tqdm(dataloader)
         loss_ema = None
         for x, c in pbar:
             optim.zero_grad()
-            x = x.to(device)
-            c = c.to(device)
+            x = x.to(os.environ.get('DEVICE'))
+            c = c.to(os.environ.get('DEVICE'))
             loss = ddpm(x, c)
             loss.backward()
             if loss_ema is None:
@@ -89,49 +90,57 @@ def train_mnist():
         # followed by real images (bottom rows)
         ddpm.eval()
         with torch.no_grad():
-            n_sample = n_samples * n_classes
-            for w_i, w in enumerate(ws_test):
+            n_sample = int(os.environ.get('N_SAMPLES')) * int(os.environ.get('N_CLASSES'))
+            for w_i, w in enumerate(os.environ.get('WS_TEST')):
                 x_gen, x_gen_store = ddpm.sample(n_sample, (1, 28, 28),
-                                                 device,
+                                                 os.environ.get('DEVICE'),
                                                  guide_w=w)
 
                 # append some real images at bottom, order by class also
-                x_real = torch.Tensor(x_gen.shape).to(device)
-                for k in range(n_classes):
-                    for j in range(int(n_sample / n_classes)):
+                x_real = torch.Tensor(x_gen.shape).to(os.environ.get('DEVICE'))
+                for k in range(int(os.environ.get('N_CLASSES'))):
+                    for j in range(
+                            int(n_sample / int(os.environ.get('N_CLASSES')))):
                         try:
                             idx = torch.squeeze((c == k).nonzero())[j]
                         except:
                             idx = 0
-                        x_real[k + (j * n_classes)] = x[idx]
+                        x_real[k +
+                               (j * int(os.environ.get('N_CLASSES')))] = x[idx]
 
                 x_all = torch.cat([x_gen, x_real])
                 grid = make_grid(x_all * -1 + 1, nrow=10)
-                save_image(grid, save_dir + f"image_ep{ep}_w{w}.png")
-                print('saved image at ' + save_dir + f"image_ep{ep}_w{w}.png")
+                save_image(grid, os.environ.get('SAVE_DIR') + f"image_ep{ep}_w{w}.png")
+                print('saved image at ' + os.environ.get('SAVE_DIR') +
+                      f"image_ep{ep}_w{w}.png")
 
-                if ep % 5 == 0 or ep == int(n_epoch - 1):
+                if ep % 5 == 0 or ep == int(os.environ.get('N_EPOCHS') - 1):
                     # create gif of images evolving over time, based on x_gen_store
-                    fig, axs = plt.subplots(nrows=int(n_sample / n_classes),
-                                            ncols=n_classes,
-                                            sharex=True,
-                                            sharey=True,
-                                            figsize=(8, 3))
+                    fig, axs = plt.subplots(
+                        nrows=int(n_sample / int(os.environ.get('N_CLASSES'))),
+                        ncols=int(os.environ.get('N_CLASSES')),
+                        sharex=True,
+                        sharey=True,
+                        figsize=(8, 3))
 
                     def animate_diff(i, x_gen_store):
                         print(
                             f'gif animating frame {i} of {x_gen_store.shape[0]}',
                             end='\r')
                         plots = []
-                        for row in range(int(n_sample / n_classes)):
-                            for col in range(n_classes):
+                        for row in range(
+                                int(n_sample /
+                                    int(os.environ.get('N_CLASSES')))):
+                            for col in range(int(os.environ.get('N_CLASSES'))):
                                 axs[row, col].clear()
                                 axs[row, col].set_xticks([])
                                 axs[row, col].set_yticks([])
                                 # plots.append(axs[row, col].imshow(x_gen_store[i,(row*n_classes)+col,0],cmap='gray'))
                                 plots.append(axs[row, col].imshow(
-                                    -x_gen_store[i,
-                                                 (row * n_classes) + col, 0],
+                                    -x_gen_store[
+                                        i,
+                                        (row * int(os.environ.get('N_CLASSES'))
+                                         ) + col, 0],
                                     cmap='gray',
                                     vmin=(-x_gen_store[i]).min(),
                                     vmax=(-x_gen_store[i]).max()))
@@ -145,16 +154,20 @@ def train_mnist():
                                         repeat=True,
                                         frames=x_gen_store.shape[0])
 
-                    ani.save(save_dir + f"gif_ep{ep}_w{w}.gif",
+                    ani.save(os.environ.get('SAVE_DIR') +
+                             f"gif_ep{ep}_w{w}.gif",
                              dpi=100,
                              writer=PillowWriter(fps=5))
 
-                    print('saved image at ' + save_dir +
+                    print('saved image at ' + os.environ.get('SAVE_DIR') +
                           f"gif_ep{ep}_w{w}.gif")
         # optionally save model
-        if save_model and ep == int(n_epoch - 1):
-            torch.save(ddpm.state_dict(), save_dir + f"model_{ep}.pth")
-            print('saved model at ' + save_dir + f"model_{ep}.pth")
+        if os.environ.get('SAVE_MODEL') and ep == int(
+                os.environ.get('N_EPOCHS') - 1):
+            torch.save(ddpm.state_dict(),
+                       os.environ.get('SAVE_DIR') + f"model_{ep}.pth")
+            print('saved model at ' + os.environ.get('SAVE_DIR') +
+                  f"model_{ep}.pth")
 
 
 if __name__ == "__main__":

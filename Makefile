@@ -24,6 +24,7 @@ clean:
 	@rm -fr build dist
 	@rm -fr miniGuideDiffusion-*.dist-info
 	@rm -fr miniGuideDiffusion.egg-info
+	@rm -fr data
 
 install:
 	@pip install . -U
@@ -40,6 +41,9 @@ count_lines:
 	@find ./tests -name '*.py' -exec  wc -l {} \; | sort -n| awk \
         '{printf "%4s %s\n", $$1, $$2}{s+=$$0}END{print s}'
 	@echo ''
+
+run_model:
+	python -m miniGuideDiffusion.trainer
 
 # ----------------------------------
 #      UPLOAD PACKAGE TO PYPI
