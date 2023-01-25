@@ -162,6 +162,15 @@ def train_mnist():
                         "results",
                     )
 
+                if int(os.environ.get("COLAB")) == 1 and int(os.environ.get('DRIVE')) == 1:
+                    out_dir = os.path.join(
+                        os.environ.get("HOME"),
+                        "..",
+                        "content",
+                        "miniGuideDiffusion",
+                        "results",
+                    )
+
                 else:
                     out_dir = os.path.join(
                         os.environ.get("HOME"),
@@ -190,13 +199,15 @@ def train_mnist():
                 if ep % int(os.environ.get("ANIMATION_STEP")) == 0 or ep == int(
                     int(os.environ.get("N_EPOCHS")) - 1
                 ):
+
+                    plot_size = os.environ.get('PLOT_SIZE').split(',')
                     # create gif of images evolving over time, based on x_gen_store
                     fig, axs = plt.subplots(
                         nrows=int(n_sample / int(os.environ.get("N_CLASSES"))),
                         ncols=int(os.environ.get("N_CLASSES")),
                         sharex=True,
                         sharey=True,
-                        figsize=(8, 4 * 3),
+                        figsize=(int(plot_size[0]), int(plot_size[1])),
                     )
 
                     def animate_diff(i, x_gen_store):
@@ -294,7 +305,7 @@ def train_mnist():
             print(
                 "\n⏹ "
                 + Fore.YELLOW
-                + "saved model at "
+                + "saved model @ "
                 + out_dir
                 + f"/model_{ep}.pth"  # os.environ.get("SAVE_DIR") +
                 + Style.RESET_ALL

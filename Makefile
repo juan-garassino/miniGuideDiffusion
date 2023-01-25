@@ -25,6 +25,7 @@ clean:
 	@rm -fr miniGuideDiffusion-*.dist-info
 	@rm -fr miniGuideDiffusion.egg-info
 	@rm -fr data
+	@rm -fr results
 	@rm -fr miniGuideDiffusion/data
 
 install:
