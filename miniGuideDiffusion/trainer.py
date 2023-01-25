@@ -167,6 +167,9 @@ def train_mnist():
                         os.environ.get("HOME"),
                         "..",
                         "content",
+                        "drive",
+                        "My drive",
+                        "repositories",
                         "miniGuideDiffusion",
                         "results",
                     )
@@ -282,6 +285,19 @@ def train_mnist():
                     os.environ.get("HOME"),
                     "..",
                     "content",
+                    "miniGuideDiffusion",
+                    "checkpoints",
+                )
+
+            if int(os.environ.get("COLAB")) == 1 and int(
+                    os.environ.get('DRIVE')) == 1:
+                out_dir = os.path.join(
+                    os.environ.get("HOME"),
+                    "..",
+                    "content",
+                    "drive",
+                    "My drive",
+                    "repositories",
                     "miniGuideDiffusion",
                     "checkpoints",
                 )
