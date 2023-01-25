@@ -142,6 +142,7 @@ def train_mnist():
                         x_real[k + (j * int(os.environ.get("N_CLASSES")))] = x[idx]
 
                 x_all = torch.cat([x_gen, x_real])
+
                 grid = make_grid(x_all * -1 + 1, nrow=10)
 
                 output_directories = Manager.output_directories()
@@ -149,6 +150,7 @@ def train_mnist():
                 for out_dir in output_directories:
 
                     out_dir = out_dir + '/results'
+
                     Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
                     save_image(
@@ -224,6 +226,9 @@ def train_mnist():
                     )
 
                     for out_dir in output_directories:
+
+                        out_dir = out_dir + '/animations'
+
                         ani.save(
                             out_dir
                             + f"/gif_ep{ep}_w{w}.gif",  # os.environ.get("SAVE_DIR") +
@@ -252,6 +257,7 @@ def train_mnist():
             for out_dir in output_directories:
 
                 out_dir = out_dir + '/checkpoints'
+
                 Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
                 torch.save(
