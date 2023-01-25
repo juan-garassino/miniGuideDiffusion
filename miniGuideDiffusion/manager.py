@@ -8,6 +8,51 @@ class Manager:  # make manager work with and with out epochs
         pass
 
     @staticmethod
+    def output_directories():
+
+        output_directories = []
+
+        if int(os.environ.get("COLAB")) == 1:
+            out_dir = os.path.join(
+                os.environ.get("HOME"),
+                "..",
+                "content",
+                "miniGuideDiffusion",
+                "checkpoints",
+            )
+
+            output_directories.append(out_dir)
+
+        if int(os.environ.get("COLAB")) == 1 and int(
+                os.environ.get('DRIVE')) == 1:
+            out_dir = os.path.join(
+                os.environ.get("HOME"),
+                "..",
+                "content",
+                "drive",
+                "MyDrive",
+                "repositories",
+                "miniGuideDiffusion",
+                "checkpoints",
+            )
+
+            output_directories.append(out_dir)
+
+        if int(os.environ.get("COLAB")) == 0:
+            out_dir = os.path.join(
+                os.environ.get("HOME"),
+                "Code",
+                "juan-garassino",
+                "miniGuideDiffusion",
+                "checkpoints",
+            )
+
+            output_directories.append(out_dir)
+
+        return output_directories
+
+
+    @staticmethod
     def make_directory(directory):
         try:
             os.makedirs(directory)

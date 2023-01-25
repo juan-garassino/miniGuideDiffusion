@@ -153,51 +153,25 @@ def train_mnist():
                 x_all = torch.cat([x_gen, x_real])
                 grid = make_grid(x_all * -1 + 1, nrow=10)
 
-                if int(os.environ.get("COLAB")) == 1:
-                    out_dir = os.path.join(
-                        os.environ.get("HOME"),
-                        "..",
-                        "content",
-                        "miniGuideDiffusion",
-                        "results",
+                output_directories = Manager.output_directories()
+
+                for out_dir in output_directories:
+
+                    Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
+
+                    save_image(
+                        grid,
+                        out_dir + f"/image_ep{ep}_w{w}.png",  # os.environ.get("SAVE_DIR") +
                     )
 
-                if int(os.environ.get("COLAB")) == 1 and int(os.environ.get('DRIVE')) == 1:
-                    out_dir = os.path.join(
-                        os.environ.get("HOME"),
-                        "..",
-                        "content",
-                        "drive",
-                        "My drive",
-                        "repositories",
-                        "miniGuideDiffusion",
-                        "results",
+                    print(
+                        "\n⏹ "
+                        + Fore.BLUE
+                        + "saved image @ "
+                        + out_dir
+                        + f"/image_ep{ep}_w{w}.png"  # os.environ.get("SAVE_DIR") +
+                        + Style.RESET_ALL
                     )
-
-                else:
-                    out_dir = os.path.join(
-                        os.environ.get("HOME"),
-                        "Code",
-                        "juan-garassino",
-                        "miniGuideDiffusion",
-                        "results",
-                    )
-
-                Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
-
-                save_image(
-                    grid,
-                    out_dir + f"/image_ep{ep}_w{w}.png",  # os.environ.get("SAVE_DIR") +
-                )
-
-                print(
-                    "\n⏹ "
-                    + Fore.BLUE
-                    + "saved image @ "
-                    + out_dir
-                    + f"/image_ep{ep}_w{w}.png"  # os.environ.get("SAVE_DIR") +
-                    + Style.RESET_ALL
-                )
 
                 if ep % int(os.environ.get("ANIMATION_STEP")) == 0 or ep == int(
                     int(os.environ.get("N_EPOCHS")) - 1
@@ -257,75 +231,49 @@ def train_mnist():
                         frames=x_gen_store.shape[0],
                     )
 
-                    ani.save(
-                        out_dir
-                        + f"/gif_ep{ep}_w{w}.gif",  # os.environ.get("SAVE_DIR") +
-                        dpi=100,
-                        writer=PillowWriter(fps=5),
-                    )
+                    for out_dir in output_directories:
+                        ani.save(
+                            out_dir
+                            + f"/gif_ep{ep}_w{w}.gif",  # os.environ.get("SAVE_DIR") +
+                            dpi=100,
+                            writer=PillowWriter(fps=5),
+                        )
 
-                    print(
-                        "\n⏹ "
-                        + Fore.RED
-                        + "saved gif @ "
-                        + out_dir
-                        +
-                        # os.environ.get("SAVE_DIR")
-                        f"/gif_ep{ep}_w{w}.gif"
-                        + Style.RESET_ALL
-                    )
+                        print(
+                            "\n⏹ "
+                            + Fore.RED
+                            + "saved gif @ "
+                            + out_dir
+                            +
+                            # os.environ.get("SAVE_DIR")
+                            f"/gif_ep{ep}_w{w}.gif"
+                            + Style.RESET_ALL
+                        )
 
         # optionally save model
         if (
             int(os.environ.get("SAVE_MODEL")) == 1
         ):  # and ep == int(os.environ.get("N_EPOCHS") - 1):
 
-            if int(os.environ.get("COLAB")) == 1:
-                out_dir = os.path.join(
-                    os.environ.get("HOME"),
-                    "..",
-                    "content",
-                    "miniGuideDiffusion",
-                    "checkpoints",
+            output_directories = Manager.output_directories()
+
+            for out_dir in output_directories:
+
+                Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
+
+                torch.save(
+                    ddpm.state_dict(),
+                    out_dir + f"/model_{ep}.pth",  # os.environ.get("SAVE_DIR")
                 )
 
-            if int(os.environ.get("COLAB")) == 1 and int(
-                    os.environ.get('DRIVE')) == 1:
-                out_dir = os.path.join(
-                    os.environ.get("HOME"),
-                    "..",
-                    "content",
-                    "drive",
-                    "My drive",
-                    "repositories",
-                    "miniGuideDiffusion",
-                    "checkpoints",
+                print(
+                    "\n⏹ "
+                    + Fore.YELLOW
+                    + "saved model @ "
+                    + out_dir
+                    + f"/model_{ep}.pth"  # os.environ.get("SAVE_DIR") +
+                    + Style.RESET_ALL
                 )
-
-            else:
-                out_dir = os.path.join(
-                    os.environ.get("HOME"),
-                    "Code",
-                    "juan-garassino",
-                    "miniGuideDiffusion",
-                    "checkpoints",
-                )
-
-            Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
-
-            torch.save(
-                ddpm.state_dict(),
-                out_dir + f"/model_{ep}.pth",  # os.environ.get("SAVE_DIR")
-            )
-
-            print(
-                "\n⏹ "
-                + Fore.YELLOW
-                + "saved model @ "
-                + out_dir
-                + f"/model_{ep}.pth"  # os.environ.get("SAVE_DIR") +
-                + Style.RESET_ALL
-            )
 
 
 if __name__ == "__main__":
