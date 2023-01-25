@@ -229,6 +229,8 @@ def train_mnist():
 
                         out_dir = out_dir + '/animations'
 
+                        Manager.make_directory(out_dir)
+
                         ani.save(
                             out_dir
                             + f"/gif_ep{ep}_w{w}.gif",  # os.environ.get("SAVE_DIR") +
