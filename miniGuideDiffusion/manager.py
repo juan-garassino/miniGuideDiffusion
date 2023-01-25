@@ -13,18 +13,20 @@ class Manager:  # make manager work with and with out epochs
         output_directories = []
 
         if int(os.environ.get("COLAB")) == 1:
+
             out_dir = os.path.join(
                 os.environ.get("HOME"),
                 "..",
                 "content",
                 "miniGuideDiffusion",
-                "checkpoints",
+                #"checkpoints",
             )
 
             output_directories.append(out_dir)
 
         if int(os.environ.get("COLAB")) == 1 and int(
                 os.environ.get('DRIVE')) == 1:
+
             out_dir = os.path.join(
                 os.environ.get("HOME"),
                 "..",
@@ -33,18 +35,19 @@ class Manager:  # make manager work with and with out epochs
                 "MyDrive",
                 "repositories",
                 "miniGuideDiffusion",
-                "checkpoints",
+                #"checkpoints",
             )
 
             output_directories.append(out_dir)
 
         if int(os.environ.get("COLAB")) == 0:
+
             out_dir = os.path.join(
                 os.environ.get("HOME"),
                 "Code",
                 "juan-garassino",
                 "miniGuideDiffusion",
-                "checkpoints",
+                #"checkpoints",
             )
 
             output_directories.append(out_dir)

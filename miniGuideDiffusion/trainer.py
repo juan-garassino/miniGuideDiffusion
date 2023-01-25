@@ -55,34 +55,25 @@ def train_mnist():
         [transforms.ToTensor()]
     )  # mnist is already normalised 0 to 1
 
-    if int(os.environ.get("COLAB")) == 1:
-        out_dir = os.path.join(
-            os.environ.get("HOME"),
-            "..",
-            "content",
-            "miniGuideDiffusion",
-            "data",
-        )
+    output_directories = Manager.output_directories()
 
-    out_dir = os.path.join(
-        os.environ.get("HOME"),
-        "Code",
-        "juan-garassino",
-        "miniGuideDiffusion",
-        "data",
-    )
+    for out_dir in output_directories:
 
-    if os.environ.get("DATASET") == "digits":
-        dataset = MNIST(out_dir, train=True, download=True,
-                        transform=tf)
+        out_dir = out_dir + '/data'
 
-    if os.environ.get("DATASET") == "fashion":
-        dataset = FashionMNIST(
-            out_dir, train=True, download=True,
-            transform=tf)
+        Manager.make_directory(out_dir)
 
-    else:
-        print("No data has been loaded")
+        if os.environ.get("DATASET") == "digits":
+            dataset = MNIST(out_dir, train=True, download=True,
+                            transform=tf)
+
+        if os.environ.get("DATASET") == "fashion":
+            dataset = FashionMNIST(
+                out_dir, train=True, download=True,
+                transform=tf)
+
+        else:
+            print("No data has been loaded")
 
     indices = torch.arange(int(os.environ.get('DATASET_SIZE')))
 
@@ -157,6 +148,7 @@ def train_mnist():
 
                 for out_dir in output_directories:
 
+                    out_dir = out_dir + '/results'
                     Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
                     save_image(
@@ -259,6 +251,7 @@ def train_mnist():
 
             for out_dir in output_directories:
 
+                out_dir = out_dir + '/checkpoints'
                 Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
                 torch.save(
