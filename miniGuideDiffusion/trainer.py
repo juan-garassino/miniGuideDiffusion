@@ -27,6 +27,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms, models
 import os
 from colorama import Fore, Style
+from datetime import datetime
 
 
 def train_mnist():
@@ -153,19 +154,17 @@ def train_mnist():
 
                     Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
+                    now = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
                     save_image(
                         grid,
-                        out_dir + f"/image_ep{ep}_w{w}.png",  # os.environ.get("SAVE_DIR") +
+                        out_dir + f"/image_ep{ep}_w{w}[{now}].png",  # os.environ.get("SAVE_DIR") +
                     )
 
                     print(
-                        "\n⏹ "
-                        + Fore.BLUE
-                        + "saved image @ "
-                        + out_dir
-                        + f"/image_ep{ep}_w{w}.png"  # os.environ.get("SAVE_DIR") +
-                        + Style.RESET_ALL
-                    )
+                        "\n⏹ " + Fore.BLUE + "saved image @ " + out_dir +
+                        f"/image_ep{ep}_w{w}[{now}].png"  # os.environ.get("SAVE_DIR") +
+                        + Style.RESET_ALL)
 
                 if ep % int(os.environ.get("ANIMATION_STEP")) == 0 or ep == int(
                     int(os.environ.get("N_EPOCHS")) - 1
@@ -231,23 +230,17 @@ def train_mnist():
 
                         Manager.make_directory(out_dir)
 
+                        now = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
                         ani.save(
                             out_dir
-                            + f"/gif_ep{ep}_w{w}.gif",  # os.environ.get("SAVE_DIR") +
+                            + f"/gif_ep{ep}_w{w}[{now}].gif",  # os.environ.get("SAVE_DIR") +
                             dpi=100,
                             writer=PillowWriter(fps=5),
                         )
 
-                        print(
-                            "\n⏹ "
-                            + Fore.RED
-                            + "saved gif @ "
-                            + out_dir
-                            +
-                            # os.environ.get("SAVE_DIR")
-                            f"/gif_ep{ep}_w{w}.gif"
-                            + Style.RESET_ALL
-                        )
+                        print("\n⏹ " + Fore.RED + "saved gif @ " + out_dir +
+                              f"/gif_ep{ep}_w{w}[{now}].gif" + Style.RESET_ALL)
 
         # optionally save model
         if (
@@ -262,19 +255,16 @@ def train_mnist():
 
                 Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
+                now = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+
                 torch.save(
                     ddpm.state_dict(),
-                    out_dir + f"/model_{ep}.pth",  # os.environ.get("SAVE_DIR")
+                    out_dir + f"/model_{ep}[{now}].pth",  # os.environ.get("SAVE_DIR")
                 )
 
-                print(
-                    "\n⏹ "
-                    + Fore.YELLOW
-                    + "saved model @ "
-                    + out_dir
-                    + f"/model_{ep}.pth"  # os.environ.get("SAVE_DIR") +
-                    + Style.RESET_ALL
-                )
+                print("\n⏹ " + Fore.YELLOW + "saved model @ " + out_dir +
+                      f"/model_{ep}[{now}].pth"  # os.environ.get("SAVE_DIR") +
+                      + Style.RESET_ALL)
 
 
 if __name__ == "__main__":
