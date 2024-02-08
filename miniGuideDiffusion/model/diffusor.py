@@ -100,10 +100,11 @@ class DDPM(nn.Module):
             weighted_noise = (1 + guide_weight) * noise_1 - guide_weight * noise_2
             x_samples = x_samples[:n_samples]
             x_samples = self.oneover_sqrta[i] * (x_samples - weighted_noise * self.mab_over_sqrtmab[i]) + self.sqrt_beta_t[i] * z
+
             if i % 20 == 0 or i == self.n_diffusion_steps or i < 8:
                 x_store.append(x_samples.detach().cpu().numpy())
 
-        print('\n')
+        # print('\n')
 
         x_store = np.array(x_store)
 
