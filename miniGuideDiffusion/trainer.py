@@ -334,12 +334,27 @@ if __name__ == "__main__":
     try:
 
         args = parse_arguments()
+
+        print(args)
+
         train_mnist(
-            args.colab, args.dataset, args.dataset_size, args.n_epochs,
-            args.animation_step, args.batch_size, args.n_diffusion_steps,
-            args.device, args.n_classes, args.n_features, args.learning_rate,
-            args.save_model, args.load_model, args.save_dir,
-            args.plot_size, args.ws_test, args.n_samples
+            colab=args.colab,
+            dataset=args.dataset,
+            dataset_size=args.dataset_size,
+            n_epochs=args.n_epochs,
+            animation_step=args.animation_step,
+            batch_size=args.batch_size,
+            n_diffusion_steps=args.n_diffusion_steps,
+            device=args.device,
+            n_classes=args.n_classes,
+            n_features=args.n_features,
+            learning_rate=args.learning_rate,
+            save_model=args.save_model,
+            load_model=args.load_model,
+            save_dir=args.save_dir,
+            plot_size=args.plot_size,
+            ws_test=args.ws_test,
+            n_samples=args.n_samples
         )
 
     except:
