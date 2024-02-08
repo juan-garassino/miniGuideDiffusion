@@ -18,6 +18,32 @@ import os
 from colorama import Fore, Style
 from datetime import datetime
 
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Training script for MNIST')
+
+    # Add arguments to the parser
+    parser.add_argument('--colab', type=int, default=0, help='Flag indicating if training is done in a Colab environment')
+    parser.add_argument('--dataset', type=str, default='digits', help='Name of the dataset being used')
+    parser.add_argument('--dataset_size', type=int, default=12, help='Size of the dataset (number of samples)')
+    parser.add_argument('--n_epochs', type=int, default=1, help='Number of epochs for training')
+    parser.add_argument('--animation_step', type=int, default=1, help='Step size for generating animations')
+    parser.add_argument('--batch_size', type=int, default=2, help='Batch size used during training')
+    parser.add_argument('--n_diffusion_steps', type=int, default=10, help='Number of diffusion steps (iterations) in the training process')
+    parser.add_argument('--device', type=str, default='cpu', help='Device used for computation (\'cpu\' or \'cuda\')')
+    parser.add_argument('--n_classes', type=int, default=10, help='Number of classes in the dataset')
+    parser.add_argument('--n_features', type=int, default=128, help='Number of features; dimensionality of the feature space (128 recommended, 256 better but slower)')
+    parser.add_argument('--learning_rate', type=float, default=1e-4, help='Learning rate used in optimization')
+    parser.add_argument('--save_model', type=int, default=1, help='Flag indicating whether to save the trained model')
+    parser.add_argument('--load_model', type=int, default=0, help='Flag indicating whether to load a pre-trained model')
+    parser.add_argument('--save_dir', type=str, default='./data/diffusion_outputs10/', help='Directory to save the model outputs')
+    parser.add_argument('--plot_size', type=str, default='8,16', help='Size of plots (e.g., [height, width])')
+    parser.add_argument('--ws_test', type=str, default='0.0,0.5,2.0', help='Strength of generative guidance for testing')
+    parser.add_argument('--n_samples', type=int, default=2, help='Number of samples used in the application')
+
+    # Parse the arguments
+    return parser.parse_args()
 
 def train_mnist(
     colab=0,  # Flag indicating if training is done in a Colab environment
@@ -304,46 +330,17 @@ def train_mnist(
                       f"/model_{ep}[{now}].pth"  # os.environ.get("SAVE_DIR") +
                       + Style.RESET_ALL)
 
-
 if __name__ == "__main__":
-
     try:
 
-        COLAB = 0
-
-        N_EPOCHS = 1
-
-        DATASET_SIZE = 12
-
-        DATASET = 'digits'
-
-        ANIMATION_STEP = 1
-
-        BATCH_SIZE = 2
-
-        N_T = 10  # 500
-
-        DEVICE = 'cpu' #"cuda:0" torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-        N_CLASSES = 10
-
-        N_FEATURES = 128  # 128 ok, 256 better (but slower)
-
-        LEARNING_RATE = 1e-4
-
-        SAVE_MODEL = 1
-
-        LOAD_MODEL = 0
-
-        SAVE_DIR = './data/diffusion_outputs10/'
-
-        PLOT_SIZE = 8,16
-
-        WS_TEST = 0.0, 0.5, 2.0  # strength of generative guidance
-
-        N_SAMPLES = 2
-
-        train_mnist()
+        args = parse_arguments()
+        train_mnist(
+            args.colab, args.dataset, args.dataset_size, args.n_epochs,
+            args.animation_step, args.batch_size, args.n_diffusion_steps,
+            args.device, args.n_classes, args.n_features, args.learning_rate,
+            args.save_model, args.load_model, args.save_dir,
+            args.plot_size, args.ws_test, args.n_samples
+        )
 
     except:
         import ipdb, traceback, sys
