@@ -82,7 +82,7 @@ class DDPM(nn.Module):
 
         for i in range(self.n_diffusion_steps, 0, -1):
 
-            print(f"⏹ Sampling timestep {i}")
+            print(f"⏹ Sampling timestep {i}", end="\r")
 
             timestep_samples = torch.tensor([i / self.n_diffusion_steps]).to(device)
             timestep_samples = timestep_samples.repeat(n_samples, 1, 1, 1)
