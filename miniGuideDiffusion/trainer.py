@@ -341,24 +341,24 @@ if __name__ == "__main__":
         print(args)
 
         train_mnist(
-            colab=args.colab,
-            drive=args.drive,
-            dataset=args.dataset,
-            dataset_size=args.dataset_size,
-            n_epochs=args.n_epochs,
-            animation_step=args.animation_step,
-            batch_size=args.batch_size,
-            n_diffusion_steps=args.n_diffusion_steps,
-            device=args.device,
-            n_classes=args.n_classes,
-            n_features=args.n_features,
-            learning_rate=args.learning_rate,
-            save_model=args.save_model,
-            load_model=args.load_model,
-            save_dir=args.save_dir,
-            plot_size=args.plot_size,
-            ws_test=args.ws_test,
-            n_samples=args.n_samples
+            colab=args.COLAB,
+            drive=args.DRIVE,
+            dataset=args.DATASET,
+            dataset_size=args.DATASET_SIZE,
+            n_epochs=args.N_EPOCHS,
+            animation_step=args.ANIMATION_STEP,
+            batch_size=args.BATCH_SIZE,
+            n_diffusion_steps=args.N_DIFFUSION_STEPS,
+            device=args.DEVICE,
+            n_classes=args.N_CLASSES,
+            n_features=args.N_FEATURES,
+            learning_rate=args.LEARNING_RATE,
+            save_model=args.SAVE_MODEL,
+            load_model=args.LOAD_MODEL,
+            save_dir=args.SAVE_DIR,
+            plot_size=args.PLOT_SIZE,
+            ws_test=args.WS_TEST,
+            n_samples=args.N_SAMPLES
         )
 
     except:
