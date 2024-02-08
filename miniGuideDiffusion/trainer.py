@@ -1,17 +1,6 @@
-"""
-This script does conditional image generation on MNIST, using a diffusion model
-This code is modified from,
-https://github.com/cloneofsimo/minDiffusion
-Diffusion model is based on DDPM,
-https://arxiv.org/abs/2006.11239
-The conditioning idea is taken from 'Classifier-Free Diffusion Guidance',
-https://arxiv.org/abs/2207.12598
-This technique also features in ImageGen 'Photorealistic Text-to-Image Diffusion Modelswith Deep Language Understanding',
-https://arxiv.org/abs/2205.11487
-"""
-from miniGuideDiffusion.context import ContextUnet
-from miniGuideDiffusion.diffusor import DDPM
-from miniGuideDiffusion.manager import Manager
+from miniGuideDiffusion.model.context import ContextUnet
+from miniGuideDiffusion.model.diffusor import DDPM
+from miniGuideDiffusion.manager.manager import Manager
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 
@@ -30,24 +19,70 @@ from colorama import Fore, Style
 from datetime import datetime
 
 
-def train_mnist():
+def train_mnist(
+    colab=0,  # Flag indicating if training is done in a Colab environment
+    dataset='digits',  # Name of the dataset being used
+    dataset_size=12,  # Size of the dataset (number of samples)
+    n_epochs=1,  # Number of epochs for training
+    animation_step=1,  # Step size for generating animations
+    batch_size=2,  # Batch size used during training
+    n_diffusion_steps=10,  # Number of diffusion steps (iterations) in the training process
+    device='cpu',  # Device used for computation ('cpu' or 'cuda')
+    n_classes=10,  # Number of classes in the dataset
+    n_features=128,  # Number of features; dimensionality of the feature space (128 recommended, 256 better but slower)
+    learning_rate=1e-4,  # Learning rate used in optimization
+    save_model=1,  # Flag indicating whether to save the trained model
+    load_model=0,  # Flag indicating whether to load a pre-trained model
+    save_dir='./data/diffusion_outputs10/',  # Directory to save the model outputs
+    plot_size='8,16',  # Size of plots (e.g., [height, width])
+    ws_test='0.0,0.5,2.0',  # Strength of generative guidance for testing
+    n_samples=2  # Number of samples used in the application
+):
+    """
+    Train a model on the MNIST dataset with specified configurations.
+
+    Parameters:
+    - colab (int): Flag indicating if training is done in a Colab environment.
+    - dataset (str): Name of the dataset being used.
+    - dataset_size (int): Size of the dataset (number of samples).
+    - n_epochs (int): Number of epochs for training.
+    - animation_step (int): Step size for generating animations.
+    - batch_size (int): Batch size used during training.
+    - diffusion_steps (int): Number of diffusion steps (iterations) in the training process.
+    - device (str): Device used for computation ('cpu' or 'cuda').
+    - n_classes (int): Number of classes in the dataset.
+    - n_features (int): Number of features; dimensionality of the feature space.
+    - learning_rate (float): Learning rate used in optimization.
+    - save_model (int): Flag indicating whether to save the trained model.
+    - load_model (int): Flag indicating whether to load a pre-trained model.
+    - save_dir (str): Directory to save the model outputs.
+    - plot_size (list): Size of plots [height, width].
+    - ws_test (list): Strength of generative guidance for testing.
+    - n_samples (int): Number of samples used in the application.
+
+    Returns:
+    None
+    """
 
     ddpm = DDPM(
         nn_model=ContextUnet(
             in_channels=1,
-            n_feat=int(os.environ.get("N_FEATURES")),
-            n_classes=int(os.environ.get("N_CLASSES")),
+            n_feat=int(n_features),
+            n_classes=int(n_classes),
         ),
         betas=(1e-4, 0.02),
-        n_T=int(os.environ.get("N_T")),
-        device=os.environ.get("DEVICE"),
+        n_diffusion_steps=int(n_diffusion_steps),
+        device=device,
         drop_prob=0.1,
     )
-    ddpm.to(os.environ.get("DEVICE"))
+
+    ddpm.to(device)
+
+    plot_size = plot_size.split(',')
 
     # optionally load a model
 
-    if os.environ.get("LOAD_MODEL") == 1:
+    if load_model == 1:
         ddpm.load_state_dict(
             torch.load("./data/diffusion_outputs/ddpm_unet01_mnist_9.pth")
         )
@@ -56,7 +91,7 @@ def train_mnist():
         [transforms.ToTensor()]
     )  # mnist is already normalised 0 to 1
 
-    output_directories = Manager.output_directories()
+    output_directories = Manager.output_directories(colab)
 
     for out_dir in output_directories:
 
@@ -64,11 +99,11 @@ def train_mnist():
 
         Manager.make_directory(out_dir)
 
-        if os.environ.get("DATASET") == "digits":
+        if dataset == "digits":
             dataset = MNIST(out_dir, train=True, download=True,
                             transform=tf)
 
-        if os.environ.get("DATASET") == "fashion":
+        if dataset == "fashion":
             dataset = FashionMNIST(
                 out_dir, train=True, download=True,
                 transform=tf)
@@ -76,39 +111,41 @@ def train_mnist():
         else:
             print("No data has been loaded")
 
-    indices = torch.arange(int(os.environ.get('DATASET_SIZE')))
+    indices = torch.arange(int(dataset_size))
 
     dataset = data_utils.Subset(dataset, indices)
 
     dataloader = DataLoader(
         dataset,
-        batch_size=int(os.environ.get("BATCH_SIZE")),
+        batch_size=int(batch_size),
         shuffle=True,
         num_workers=1#5,
     )
 
     optim = torch.optim.Adam(
-        ddpm.parameters(), lr=float(os.environ.get("LEARNING_RATE"))
+        ddpm.parameters(), lr=float(learning_rate)
     )
 
-    for ep in range(int(os.environ.get("N_EPOCHS"))):
+    for ep in range(int(n_epochs)):
 
         print("\n⏹ " + Fore.MAGENTA + f"epoch {ep}" + Style.RESET_ALL)
 
         ddpm.train()
 
         # linear lrate decay
-        optim.param_groups[0]["lr"] = float(os.environ.get("LEARNING_RATE")) * (
-            1 - ep / int(os.environ.get("N_EPOCHS"))
+        optim.param_groups[0]["lr"] = float(learning_rate) * (
+            1 - ep / int(n_epochs)
         )
 
         pbar = tqdm(dataloader)
         loss_ema = None
+
         print("\n")
+
         for x, c in pbar:
             optim.zero_grad()
-            x = x.to(os.environ.get("DEVICE"))
-            c = c.to(os.environ.get("DEVICE"))
+            x = x.to(device)
+            c = c.to(device)
             loss = ddpm(x, c)
             loss.backward()
             if loss_ema is None:
@@ -120,37 +157,39 @@ def train_mnist():
             )
             optim.step()
 
+            print('\n')
+
         # for eval, save an image of currently generated samples (top rows)
         # followed by real images (bottom rows)
         ddpm.eval()
         with torch.no_grad():
-            n_sample = int(os.environ.get("N_SAMPLES")) * int(
-                os.environ.get("N_CLASSES")
+            n_sample = int(n_samples) * int(
+                n_classes
             )
-            for w_i, w in enumerate(os.environ.get("WS_TEST").split(",")):
+            for w_i, w in enumerate(ws_test.split(",")):
                 x_gen, x_gen_store = ddpm.sample(
-                    n_sample, (1, 28, 28), os.environ.get("DEVICE"), guide_w=float(w)
+                    n_sample, (1, 28, 28), device, guide_weight=float(w)
                 )
 
                 # append some real images at bottom, order by class also
-                x_real = torch.Tensor(x_gen.shape).to(os.environ.get("DEVICE"))
-                for k in range(int(os.environ.get("N_CLASSES"))):
-                    for j in range(int(n_sample / int(os.environ.get("N_CLASSES")))):
+                x_real = torch.Tensor(x_gen.shape).to(device)
+                for k in range(int(n_classes)):
+                    for j in range(int(n_sample / int(n_classes))):
                         try:
                             idx = torch.squeeze((c == k).nonzero())[j]
                         except:
                             idx = 0
-                        x_real[k + (j * int(os.environ.get("N_CLASSES")))] = x[idx]
+                        x_real[k + (j * int(n_classes))] = x[idx]
 
                 x_all = torch.cat([x_gen, x_real])
 
                 grid = make_grid(x_all * -1 + 1, nrow=10)
 
-                output_directories = Manager.output_directories()
+                output_directories = Manager.output_directories(colab)
 
                 for out_dir in output_directories:
 
-                    out_dir = out_dir + '/results'
+                    out_dir = out_dir + '/results/snapshots'
 
                     Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
@@ -166,15 +205,14 @@ def train_mnist():
                         f"/image_ep{ep}_w{w}[{now}].png"  # os.environ.get("SAVE_DIR") +
                         + Style.RESET_ALL)
 
-                if ep % int(os.environ.get("ANIMATION_STEP")) == 0 or ep == int(
-                    int(os.environ.get("N_EPOCHS")) - 1
+                if ep % int(animation_step) == 0 or ep == int(
+                    int(n_epochs) - 1
                 ):
 
-                    plot_size = os.environ.get('PLOT_SIZE').split(',')
                     # create gif of images evolving over time, based on x_gen_store
                     fig, axs = plt.subplots(
-                        nrows=int(n_sample / int(os.environ.get("N_CLASSES"))),
-                        ncols=int(os.environ.get("N_CLASSES")),
+                        nrows=int(n_sample / int(n_classes)),
+                        ncols=int(n_classes),
                         sharex=True,
                         sharey=True,
                         figsize=(int(plot_size[0]), int(plot_size[1])),
@@ -192,9 +230,9 @@ def train_mnist():
 
                         plots = []
                         for row in range(
-                            int(n_sample / int(os.environ.get("N_CLASSES")))
+                            int(n_sample / int(n_classes))
                         ):
-                            for col in range(int(os.environ.get("N_CLASSES"))):
+                            for col in range(int(n_classes)):
                                 axs[row, col].clear()
                                 axs[row, col].set_xticks([])
                                 axs[row, col].set_yticks([])
@@ -203,7 +241,7 @@ def train_mnist():
                                     axs[row, col].imshow(
                                         -x_gen_store[
                                             i,
-                                            (row * int(os.environ.get("N_CLASSES")))
+                                            (row * int(n_classes))
                                             + col,
                                             0,
                                         ],
@@ -226,7 +264,7 @@ def train_mnist():
 
                     for out_dir in output_directories:
 
-                        out_dir = out_dir + '/animations'
+                        out_dir = out_dir + '/results/animations'
 
                         Manager.make_directory(out_dir)
 
@@ -244,14 +282,14 @@ def train_mnist():
 
         # optionally save model
         if (
-            int(os.environ.get("SAVE_MODEL")) == 1
-        ):  # and ep == int(os.environ.get("N_EPOCHS") - 1):
+            int(save_model) == 1
+        ):  # and ep == int(n_epochs - 1):
 
-            output_directories = Manager.output_directories()
+            output_directories = Manager.output_directories(colab)
 
             for out_dir in output_directories:
 
-                out_dir = out_dir + '/checkpoints'
+                out_dir = out_dir + '/results/checkpoints'
 
                 Manager.make_directory(out_dir)  # os.environ.get("SAVE_DIR"))
 
@@ -268,4 +306,50 @@ def train_mnist():
 
 
 if __name__ == "__main__":
-    train_mnist()
+
+    try:
+
+        COLAB = 0
+
+        N_EPOCHS = 1
+
+        DATASET_SIZE = 12
+
+        DATASET = 'digits'
+
+        ANIMATION_STEP = 1
+
+        BATCH_SIZE = 2
+
+        N_T = 10  # 500
+
+        DEVICE = 'cpu' #"cuda:0" torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        N_CLASSES = 10
+
+        N_FEATURES = 128  # 128 ok, 256 better (but slower)
+
+        LEARNING_RATE = 1e-4
+
+        SAVE_MODEL = 1
+
+        LOAD_MODEL = 0
+
+        SAVE_DIR = './data/diffusion_outputs10/'
+
+        PLOT_SIZE = 8,16
+
+        WS_TEST = 0.0, 0.5, 2.0  # strength of generative guidance
+
+        N_SAMPLES = 2
+
+        train_mnist()
+
+    except:
+        import ipdb, traceback, sys
+
+        extype, value, tb = sys.exc_info()
+
+        traceback.print_exc()
+
+        ipdb.post_mortem(tb)
