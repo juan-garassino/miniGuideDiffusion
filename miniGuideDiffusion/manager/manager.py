@@ -8,7 +8,7 @@ class Manager:  # make manager work with and with out epochs
         pass
 
     @staticmethod
-    def output_directories(colab):
+    def output_directories(colab, drive):
 
         output_directories = []
 
@@ -24,8 +24,7 @@ class Manager:  # make manager work with and with out epochs
 
             output_directories.append(out_dir)
 
-        if int(colab) == 1 and int(
-                os.environ.get('DRIVE')) == 1:
+        if int(colab) == 1 and int(drive) == 1:
 
             out_dir = os.path.join(
                 os.environ.get("HOME"),
