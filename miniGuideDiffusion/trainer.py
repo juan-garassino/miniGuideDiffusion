@@ -186,11 +186,12 @@ def train_mnist(
             )
             optim.step()
 
-            print('\n')
+        print('\n')
 
         # for eval, save an image of currently generated samples (top rows)
         # followed by real images (bottom rows)
         ddpm.eval()
+
         with torch.no_grad():
             n_sample = int(n_samples) * int(
                 n_classes

@@ -81,6 +81,7 @@ class DDPM(nn.Module):
         x_store = []  # Keep track of generated steps in case want to plot something
 
         for i in range(self.n_diffusion_steps, 0, -1):
+
             print(f"⏹ Sampling timestep {i}")
 
             timestep_samples = torch.tensor([i / self.n_diffusion_steps]).to(device)
@@ -102,5 +103,8 @@ class DDPM(nn.Module):
             if i % 20 == 0 or i == self.n_diffusion_steps or i < 8:
                 x_store.append(x_samples.detach().cpu().numpy())
 
+        print('\n')
+
         x_store = np.array(x_store)
+
         return x_samples, x_store
